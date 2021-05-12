@@ -43,4 +43,8 @@ class Board:
                 )
                 color_index = (color_index + 1) % 2
 
-    # def annotate_board()
+    def annotate_board(self):
+        pass
+
+    def reverse_board(self):
+        pass
