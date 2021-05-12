@@ -277,7 +277,8 @@ class ChessGame:
             # step 4: swap buffers to display what has been drawn at the previous step
             pygame.display.flip()
 
-
+    pygame.quit()
+    
 if __name__ == "__main__":
     chess_game = ChessGame()
     chess_game.run_game()
