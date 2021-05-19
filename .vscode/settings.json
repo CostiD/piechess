@@ -2,5 +2,7 @@
     "python.pythonPath": "C:\\Users\\user\\anaconda3\\envs\\chess\\python.exe",
     "python.formatting.provider": "black",
     "editor.formatOnSave": true,
-
+    "python.analysis.extraPaths": [
+        "C:\\Users\\user\\anaconda3\\envs\\chess\\Lib\\site-packages/"
+    ],
 }

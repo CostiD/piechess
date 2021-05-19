@@ -32,3 +32,9 @@ class Settings:
 
         # text
         self.game_font = pygame.freetype.SysFont("courier", 16)
+        self.ASCII_a = 97
+        self.ASCII_A = 65
+
+        # centering offsets
+        self.x_offset = None
+        self.y_offset = None

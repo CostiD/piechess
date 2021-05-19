@@ -1,6 +1,8 @@
 import pygame
 from typing import List
 
+import time
+
 from settings import Settings
 from board import Board
 from pieces import *
@@ -17,268 +19,138 @@ class ChessGame:
         )
         self.chess_board = Board(self)
 
-        image_filenames = [
-            r"images\black_king.png",
-            r"images\black_queen.png",
-            r"images\black_bishop.png",
-            r"images\black_knight.png",
-            r"images\black_rook.png",
-            r"images\black_pawn.png",
-            r"images\white_king.png",
-            r"images\white_queen.png",
-            r"images\white_bishop.png",
-            r"images\white_knight.png",
-            r"images\white_rook.png",
-            r"images\white_pawn.png",
-        ]
-        self.images = self._load_images(image_filenames)
-
         self.my_font = self.setup.game_font
 
-        self.all_sprites = self._load_sprites()
+        self.all_pieces = []
 
-    def _load_images(self, filenames: List[str]):
-        self.filenames = filenames
-        images = []
-        for file in filenames:
-            images.append(pygame.image.load(f"{file}"))
-        return images
-
-    def _load_sprites(self):
-        all_sprites = []
-        # the black pieces
-        # -------------------------------
-        black_rook_on_a8 = Rook(
-            self.images[4],
-            (
-                self.chess_board.board_positions[0][0][0]
-                + (self.setup.square_width - self.images[4].get_width()) / 2,
-                self.chess_board.board_positions[0][0][1]
-                + (self.setup.square_height - self.images[4].get_height()) / 2,
-            ),
-        )
-        all_sprites.append(black_rook_on_a8)
-        # -------------------------------
-        black_bishop_on_b8 = Bishop(
-            self.images[2],
-            (
-                self.chess_board.board_positions[1][0][0]
-                + (self.setup.square_width - self.images[2].get_width()) / 2,
-                self.chess_board.board_positions[1][0][1]
-                + (self.setup.square_height - self.images[2].get_height()) / 2,
-            ),
-        )
-        all_sprites.append(black_bishop_on_b8)
-        # -------------------------------
-        black_knight_on_c8 = Knight(
-            self.images[3],
-            (
-                self.chess_board.board_positions[2][0][0]
-                + (self.setup.square_width - self.images[3].get_width()) / 2,
-                self.chess_board.board_positions[2][0][1]
-                + (self.setup.square_height - self.images[3].get_height()) / 2,
-            ),
-        )
-        all_sprites.append(black_knight_on_c8)
-        # -------------------------------
-        black_queen_on_d8 = Queen(
-            self.images[1],
-            (
-                self.chess_board.board_positions[3][0][0]
-                + (self.setup.square_width - self.images[1].get_width()) / 2,
-                self.chess_board.board_positions[3][0][1]
-                + (self.setup.square_height - self.images[1].get_height()) / 2,
-            ),
-        )
-        all_sprites.append(black_queen_on_d8)
-        # -------------------------------
-        black_king_on_e8 = King(
-            self.images[0],
-            (
-                self.chess_board.board_positions[4][0][0]
-                + (self.setup.square_width - self.images[0].get_width()) / 2,
-                self.chess_board.board_positions[4][0][1]
-                + (self.setup.square_height - self.images[0].get_height()) / 2,
-            ),
-        )
-        all_sprites.append(black_king_on_e8)
-        # -------------------------------
-        black_knight_on_f8 = Knight(
-            self.images[3],
-            (
-                self.chess_board.board_positions[5][0][0]
-                + (self.setup.square_width - self.images[3].get_width()) / 2,
-                self.chess_board.board_positions[5][0][1]
-                + (self.setup.square_height - self.images[3].get_height()) / 2,
-            ),
-        )
-        all_sprites.append(black_knight_on_f8)
-        # -------------------------------
-        black_bishop_on_g8 = Bishop(
-            self.images[2],
-            (
-                self.chess_board.board_positions[6][0][0]
-                + (self.setup.square_width - self.images[2].get_width()) / 2,
-                self.chess_board.board_positions[6][0][1]
-                + (self.setup.square_height - self.images[2].get_height()) / 2,
-            ),
-        )
-        all_sprites.append(black_bishop_on_g8)
-        # -------------------------------
-        black_rook_on_h8 = Rook(
-            self.images[4],
-            (
-                self.chess_board.board_positions[7][0][0]
-                + (self.setup.square_width - self.images[4].get_width()) / 2,
-                self.chess_board.board_positions[7][0][1]
-                + (self.setup.square_height - self.images[4].get_height()) / 2,
-            ),
-        )
-        all_sprites.append(black_rook_on_h8)
-        # --------------------------------
-        for col in range(self.chess_board.num_cols):
-            black_pawn = Pawn(
-                self.images[5],
-                (
-                    self.chess_board.board_positions[col][1][0]
-                    + (self.setup.square_width - self.images[5].get_width()) / 2,
-                    self.chess_board.board_positions[col][1][1]
-                    + (self.setup.square_height - self.images[5].get_height()) / 2,
+        # add kings: black king on e8, white king on e1
+        # ---> ranks: 8, 1; files: e
+        self.all_pieces += [
+            King(
+                color,
+                tuple(
+                    self.chess_board.board_positions.sel(rank=rank).sel(file="e").values
                 ),
             )
-            all_sprites.append(black_pawn)
+            for color, rank in zip(["black", "white"], [8, 1])
+        ]
 
-        # ======================================#
-        # ======================================#
-        # ======================================#
-        # ======================================#
-        # ======================================#
-        # ======================================#
-        # white pieces
-        # -------------------------------
-        black_rook_on_a8 = Rook(
-            self.images[4 + 6],
-            (
-                self.chess_board.board_positions[0][7][0]
-                + (self.setup.square_width - self.images[4 + 6].get_width()) / 2,
-                self.chess_board.board_positions[0][7][1]
-                + (self.setup.square_height - self.images[4 + 6].get_height()) / 2,
-            ),
-        )
-        all_sprites.append(black_rook_on_a8)
-        # -------------------------------
-        black_bishop_on_b8 = Bishop(
-            self.images[2 + 6],
-            (
-                self.chess_board.board_positions[1][7][0]
-                + (self.setup.square_width - self.images[2 + 6].get_width()) / 2,
-                self.chess_board.board_positions[1][7][1]
-                + (self.setup.square_height - self.images[2 + 6].get_height()) / 2,
-            ),
-        )
-        all_sprites.append(black_bishop_on_b8)
-        # -------------------------------
-        black_knight_on_c8 = Knight(
-            self.images[3 + 6],
-            (
-                self.chess_board.board_positions[2][7][0]
-                + (self.setup.square_width - self.images[3 + 6].get_width()) / 2,
-                self.chess_board.board_positions[2][7][1]
-                + (self.setup.square_height - self.images[3 + 6].get_height()) / 2,
-            ),
-        )
-        all_sprites.append(black_knight_on_c8)
-        # -------------------------------
-        black_queen_on_d8 = Queen(
-            self.images[1 + 6],
-            (
-                self.chess_board.board_positions[3][7][0]
-                + (self.setup.square_width - self.images[1 + 6].get_width()) / 2,
-                self.chess_board.board_positions[3][7][1]
-                + (self.setup.square_height - self.images[1 + 6].get_height()) / 2,
-            ),
-        )
-        all_sprites.append(black_queen_on_d8)
-        # -------------------------------
-        black_king_on_e8 = King(
-            self.images[0 + 6],
-            (
-                self.chess_board.board_positions[4][7][0]
-                + (self.setup.square_width - self.images[0 + 6].get_width()) / 2,
-                self.chess_board.board_positions[4][7][1]
-                + (self.setup.square_height - self.images[0 + 6].get_height()) / 2,
-            ),
-        )
-        all_sprites.append(black_king_on_e8)
-        # -------------------------------
-        black_knight_on_f8 = Knight(
-            self.images[3 + 6],
-            (
-                self.chess_board.board_positions[5][7][0]
-                + (self.setup.square_width - self.images[3 + 6].get_width()) / 2,
-                self.chess_board.board_positions[5][7][1]
-                + (self.setup.square_height - self.images[3 + 6].get_height()) / 2,
-            ),
-        )
-        all_sprites.append(black_knight_on_f8)
-        # -------------------------------
-        black_bishop_on_g8 = Bishop(
-            self.images[2 + 6],
-            (
-                self.chess_board.board_positions[6][7][0]
-                + (self.setup.square_width - self.images[2 + 6].get_width()) / 2,
-                self.chess_board.board_positions[6][7][1]
-                + (self.setup.square_height - self.images[2 + 6].get_height()) / 2,
-            ),
-        )
-        all_sprites.append(black_bishop_on_g8)
-        # -------------------------------
-        black_rook_on_h8 = Rook(
-            self.images[4 + 6],
-            (
-                self.chess_board.board_positions[7][7][0]
-                + (self.setup.square_width - self.images[4 + 6].get_width()) / 2,
-                self.chess_board.board_positions[7][7][1]
-                + (self.setup.square_height - self.images[4 + 6].get_height()) / 2,
-            ),
-        )
-        all_sprites.append(black_rook_on_h8)
-        # --------------------------------
-        for col in range(self.chess_board.num_cols):
-            black_pawn = Pawn(
-                self.images[5 + 6],
-                (
-                    self.chess_board.board_positions[col][6][0]
-                    + (self.setup.square_width - self.images[5 + 6].get_width()) / 2,
-                    self.chess_board.board_positions[col][6][1]
-                    + (self.setup.square_height - self.images[5 + 6].get_height()) / 2,
+        # add Queens
+        self.all_pieces += [
+            Queen(
+                color,
+                tuple(
+                    self.chess_board.board_positions.sel(rank=rank).sel(file="d").values
                 ),
             )
-            all_sprites.append(black_pawn)
-        return all_sprites
+            for color, rank in zip(["black", "white"], [8, 1])
+        ]
+
+        # add Bishops
+        self.all_pieces += [
+            Bishop(
+                color,
+                tuple(
+                    self.chess_board.board_positions.sel(rank=rank)
+                    .sel(file=file)
+                    .values
+                ),
+            )
+            for color, rank, file in zip(
+                ["black", "white"] * 2, [8, 1] * 2, ["f", "f", "c", "c"]
+            )
+        ]
+
+        # add Knights
+        self.all_pieces += [
+            Knight(
+                color,
+                tuple(
+                    self.chess_board.board_positions.sel(rank=rank)
+                    .sel(file=file)
+                    .values
+                ),
+            )
+            for color, rank, file in zip(
+                ["black", "white"] * 2, [8, 1] * 2, ["g", "g", "b", "b"]
+            )
+        ]
+
+        # add Rooks
+        self.all_pieces += [
+            Rook(
+                color,
+                tuple(
+                    self.chess_board.board_positions.sel(rank=rank)
+                    .sel(file=file)
+                    .values
+                ),
+            )
+            for color, rank, file in zip(
+                ["black", "white"] * 2, [8, 1] * 2, ["h", "h", "a", "a"]
+            )
+        ]
+
+        # add Pawns; NOTE: ASCII code for `a` is 97.
+        self.all_pieces += [
+            Pawn(
+                color,
+                tuple(
+                    self.chess_board.board_positions.sel(rank=rank)
+                    .sel(file=file)
+                    .values
+                ),
+            )
+            for color, rank, file in zip(
+                ["black", "white"] * 8,
+                [7, 2] * 8,
+                [s for s in [chr(c) for c in range(97, 97 + 8)] for i in range(2)],
+            )
+        ]
 
     # game loop
     def run_game(self):
+        t0 = time.perf_counter()
+        frame_count = 0
+        frame_rate = 0
         while True:
             # step 1: poll events and handle input
             event = pygame.event.poll()
             if event.type == pygame.QUIT:
                 break
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                position_of_click = event.dict["pos"]
+                for piece in self.all_pieces:
+                    if piece.contains_point(position_of_click, piece.image):
+                        piece.handle_click(piece.image)
+                        break
 
+            frame_count += 1
+            if frame_count % 500 == 0:
+                t1 = time.perf_counter()
+                frame_rate = 500 / (t1 - t0)
+                t0 = t1
             # step 2: update data structures/object - change color/position etc. of objects
 
             # step 3: draw everything from scratch on the hidden buffer
             self.main_window.fill((self.setup.bg_color))
             self.chess_board.draw_board(self.main_window)
 
-            for sprite in self.all_sprites:
-                sprite.draw_piece(self.main_window)
+            for piece in self.all_pieces:
+                piece.draw_piece(self.main_window)
 
+            self.my_font.render_to(
+                self.main_window,
+                (100, 500),
+                f"Frame {frame_count}. {frame_rate:.2f} fps",
+                fgcolor=(0, 0, 0),
+            )
             # step 4: swap buffers to display what has been drawn at the previous step
             pygame.display.flip()
 
     pygame.quit()
-    
+
+
 if __name__ == "__main__":
     chess_game = ChessGame()
     chess_game.run_game()
